@@ -28,7 +28,7 @@ jobs:
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: pokemon-img-ecr
-          IMAGE_TAG: latest # You can set this to the tag you want to use or retrieve dynamically
+          IMAGE_TAG: ${{ github.sha }} # You can set this to the tag you want to use or retrieve dynamically
         run: |
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
