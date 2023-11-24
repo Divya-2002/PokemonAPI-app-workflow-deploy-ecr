@@ -36,7 +36,7 @@ jobs:
       - name: Get latest ECR image tag
         id: get-latest-tag
         run: |
-          IMAGE_TAG=$(aws ecr describe-images --repository-name test_ml_demo --query 'sort_by(imageDetails,& imagePushedAt)[*].[imageTags]' --output text | tail -n 1)
+          IMAGE_TAG=$(aws ecr describe-images --repository-name pokemon-img-ecr --query 'sort_by(imageDetails,& imagePushedAt)[*].[imageTags]' --output text | tail -n 1)
           echo "::set-output name=latest_tag::$IMAGE_TAG"
 
       - name: Set new image in the Cluster
