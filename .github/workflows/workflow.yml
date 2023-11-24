@@ -33,7 +33,17 @@ jobs:
       env:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         ECR_REPOSITORY: pokemon-img-ecr
-        IMAGE_TAG: my_image
+        IMAGE_TAG: ${{ github.sha }}
       run: |
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+
+    - name: Set new image in the Cluster
+      uses: ladislas14/kubernetes-action@1.0.1
+      with:
+        args: set image deployment/deployment.yml pod/my-app-7d4466dd8b-8b5kt=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+        kubeconfig: ${{ secrets.KUBE_CONFIG_DATA }}
+
+      
+      
+
