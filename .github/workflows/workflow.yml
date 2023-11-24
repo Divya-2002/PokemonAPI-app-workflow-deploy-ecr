@@ -39,7 +39,7 @@ jobs:
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
     - name: Set new image in the Cluster
-      uses: ladislas14/kubernetes-action@1.0.1
+      uses: appleboy/kubectl-action@v2.0.0
       with:
         args: set image deployment/deployment.yml pod/my-app-7d4466dd8b-8b5kt=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
         kubeconfig: ${{ secrets.KUBE_CONFIG_DATA }}
