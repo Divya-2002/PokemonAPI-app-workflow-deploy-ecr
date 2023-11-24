@@ -1,49 +1,40 @@
 name: Deploy to ECR
 
 on:
- 
   push:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
-  
   build:
-    
     name: Build Image
     runs-on: ubuntu-latest
 
-   
     steps:
+      - name: Check out code
+        uses: actions/checkout@v2
 
-    - name: Check out code
-      uses: actions/checkout@v2
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-south-1
 
-    - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v1
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: ap-south-1
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
 
-    - name: Login to Amazon ECR
-      id: login-ecr
-      uses: aws-actions/amazon-ecr-login@v1
+      - name: Build, tag, and push image to Amazon ECR
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: pokemon-img-ecr
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
-    - name: Build, tag, and push image to Amazon ECR
-      env:
-        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        ECR_REPOSITORY: pokemon-img-ecr
-        IMAGE_TAG: ${{ github.sha }}
-      run: |
-        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-
-    - name: Set new image in the Cluster
-      uses: ravinayag/aws-eks-actions@eks
-      with:
-        args: set image deployment/deployment.yml pod/my-app-7d4466dd8b-8b5kt=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-        kubeconfig: ${{ secrets.KUBE_CONFIG_DATA }}
-
-      
-      
+      - name: Set new image in the Cluster
+        run: |
+          aws eks --region ap-south-1 update-kubeconfig --name git-cluster
+          kubectl set image deployment/deployment.yml my-app-7d4466dd8b-8b5kt=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
