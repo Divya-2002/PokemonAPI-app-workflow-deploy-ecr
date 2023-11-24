@@ -36,5 +36,5 @@ jobs:
       - name: Set new image in the Cluster
         run: |
           aws eks --region ap-south-1 update-kubeconfig --name git-cluster
-          kubectl set image deployment/my-app my-app-7d4466dd8b-8b5kt=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          kubectl set image deployment/my-app  my-app-7d4466dd8b-8b5kt=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
